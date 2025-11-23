@@ -7,6 +7,13 @@ export default function Stock(){
   const adjust = useAdjustStock();
 
   const doAdjust = async (variantId, amount) => {
+/**
+ * Adjust the stock of a variant by a given amount.
+ * The adjustment is logged as a manual adjustment by the current user.
+ * A success alert is shown after the adjustment is done.
+ * @param {number} variantId - The ID of the variant to adjust.
+ * @param {number} amount - The amount to adjust the stock by.
+ */
     await adjust.mutate({ productVariantId: variantId, quantity: amount, reason: "Manual adjustment", createdBy: 1 });
     alert("Adjusted");
   };
