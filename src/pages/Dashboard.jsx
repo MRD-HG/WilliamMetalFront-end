@@ -38,7 +38,7 @@ export default function Dashboard() {
         <div className="col-span-2 bg-white p-4 rounded shadow">
           <div className="font-semibold mb-2">Sales (last 30 days)</div>
           <div style={{ height: 240 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" aspect={2}>
               <LineChart data={chartData}>
                 <XAxis dataKey="date" />
                 <YAxis />
