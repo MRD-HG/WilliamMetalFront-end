@@ -1,16 +1,23 @@
 // src/pages/Dashboard.jsx
 import React from "react";
-import {
-  useDashboardMetrics,
-  useSalesChart,
-  useInvoices
-} from "../api/hooks";
+import { useDashboardMetrics, useSalesChart, useInvoices } from "../api/hooks";
 import KpiCard from "../components/KpiCard";
 import DataTable from "../components/DataTable";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function Dashboard() {
-  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics();
+  const { data: metrics, error: metricsError } = useDashboardMetrics();
+if (metricsError) {
+  console.error("Metrics error", metricsError);
+}
+
   const { data: salesData, isLoading: salesLoading } = useSalesChart();
   const { data: invoices, isLoading: invoicesLoading } = useInvoices();
 
@@ -20,7 +27,7 @@ export default function Dashboard() {
     monthSales: 0,
     lowStockCount: 0,
     stockValue: 0,
-    lowStockList: []
+    lowStockList: [],
   };
 
   const chartData = salesData || [];
@@ -28,22 +35,47 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4">
-        <KpiCard title="Today Sales" value={kpis.todaySales} delta={5} subtitle="Revenue today" />
-        <KpiCard title="Month Sales" value={kpis.monthSales} delta={8} subtitle="Revenue this month" />
-        <KpiCard title="Low Stock" value={kpis.lowStockCount} delta={-2} subtitle="Items below threshold" />
-        <KpiCard title="Stock Value" value={kpis.stockValue} delta={3} subtitle="Estimated value" />
+        <KpiCard
+          title="Today Sales"
+          value={kpis.todaySales}
+          delta={5}
+          subtitle="Revenue today"
+        />
+        <KpiCard
+          title="Month Sales"
+          value={kpis.monthSales}
+          delta={8}
+          subtitle="Revenue this month"
+        />
+        <KpiCard
+          title="Low Stock"
+          value={kpis.lowStockCount}
+          delta={-2}
+          subtitle="Items below threshold"
+        />
+        <KpiCard
+          title="Stock Value"
+          value={kpis.stockValue}
+          delta={3}
+          subtitle="Estimated value"
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded shadow">
           <div className="font-semibold mb-2">Sales (last 30 days)</div>
-          <div style={{ height: 240 }}>
-            <ResponsiveContainer width="100%" aspect={2}>
+          <div style={{ width: "100%", height: 320 }}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#0f1724" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="total || value"
+                  stroke="#0f1724"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -53,13 +85,15 @@ export default function Dashboard() {
           <div className="font-semibold mb-2">Low Stock Items</div>
           <div style={{ maxHeight: 240 }} className="overflow-auto">
             <ul className="space-y-2">
-              {(kpis.lowStockList || []).map(item => (
+              {(kpis.lowStockList || []).map((item) => (
                 <li key={item.id} className="flex justify-between">
                   <div>{item.sizeLabel}</div>
                   <div className="text-sm text-red-600">{item.stockQty}</div>
                 </li>
               ))}
-              {(!kpis.lowStockList || kpis.lowStockList.length === 0) && <li className="text-sm text-gray-400">No low stock items</li>}
+              {(!kpis.lowStockList || kpis.lowStockList.length === 0) && (
+                <li className="text-sm text-gray-400">No low stock items</li>
+              )}
             </ul>
           </div>
         </div>
@@ -67,7 +101,11 @@ export default function Dashboard() {
 
       <div className="bg-white p-4 rounded shadow">
         <div className="font-semibold mb-2">Latest Invoices</div>
-        {invoicesLoading ? <div>Loading...</div> : <InvoicesList invoices={invoices || []} />}
+        {invoicesLoading ? (
+          <div>Loading...</div>
+        ) : (
+          <InvoicesList invoices={invoices || []} />
+        )}
       </div>
     </div>
   );
@@ -78,7 +116,11 @@ function InvoicesList({ invoices }) {
   const cols = [
     { key: "id", title: "ID" },
     { key: "invoiceNo", title: "No" },
-    { key: "date", title: "Date", render: r => new Date(r.date).toLocaleString() },
+    {
+      key: "date",
+      title: "Date",
+      render: (r) => new Date(r.date).toLocaleString(),
+    },
     { key: "totalAmount", title: "Total" },
     { key: "paymentStatus", title: "Status" },
   ];

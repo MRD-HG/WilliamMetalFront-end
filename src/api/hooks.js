@@ -28,7 +28,7 @@ export const useVariants = () =>
 export const useCreateVariant = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: p => api.post("/productvariants", p).then(r => r.data),
+    mutationFn: ({ productId, payload }) => api.post(`/products/${productId}/variants`, payload).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["variants"] })
   });
 };
@@ -36,11 +36,8 @@ export const useCreateVariant = () => {
 export const useUpdateVariant = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }) => api.put(`/productvariants/${id}`, payload).then(r => r.data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["variants"] });
-      qc.invalidateQueries({ queryKey: ["stock"] });
-    }
+    mutationFn: ({ id, payload }) => api.put(`/products/variants/${id}`, payload).then(r => r.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["variants"] }); qc.invalidateQueries({ queryKey: ["stock"] }); }
   });
 };
 
